@@ -1,56 +1,59 @@
-import qs.config
-import Quickshell
-import Quickshell.Widgets
-import Quickshell.Services.SystemTray
 import QtQuick
+import QtQuick.Layouts
 
-MouseArea {
-    id: root
+Item {
+    id: trayMaster
+    implicitHeight: parent.height
+    implicitWidth: trayOpen ? 320 : trayButton.width
 
-    required property SystemTrayItem modelData
-    required property int barHeight
+    property bool trayOpen: true
 
-    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-    implicitWidth: UIConfig.trayIconHitboxWidth
-    implicitHeight: barHeight
+    function toggleTray() {
+        if (trayOpen) {
+            trayOpen = false;
+        } else {
+            trayOpen = true;
+        }
+        isActive = trayOpen;
+    }
 
-    onClicked: event => {
-        switch (event.button) {
-        case Qt.LeftButton:
-            modelData.activate();
-            break;
-        case Qt.RightButton:
-            if (modelData.hasMenu) {
-                menu.open();
-            }
-            break;
-        case Qt.MiddleButton:
-            modelData.secondaryActivate();
-            break;
+    Behavior on implicitWidth {
+        PropertyAnimation {
+            duration: 500
+            easing.type: Easing.OutExpo
         }
     }
 
-    QsMenuAnchor {
-        id: menu
+    Row {
+        spacing: 5
+        anchors.fill: parent
+        Text {
+            id: trayButton
+            anchors.verticalCenter: parent.verticalCenter
+            text: trayOpen ? "" : ""
+            color: "#232332"
+            font.pointSize: 15
 
-        menu: root.modelData.menu
-        anchor.item: root
-    }
-
-    IconImage {
-        id: icon
-
-        implicitSize: UIConfig.trayIconSize
-        anchors.centerIn: parent
-
-        source: {
-            let icon = root.modelData.icon;
-            if (icon.includes("?path=")) {
-                const [name, path] = icon.split("?path=");
-                icon = `file://${path}/${name.slice(name.lastIndexOf("/") + 1)}`;
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: parent.color = "#1e1e2e"
+                onExited: parent.color = "#232332"
+                onPressed: toggleTray()
             }
-            return icon;
         }
-        asynchronous: true
+
+        // The actuall tray
+        Item {
+            id: tray
+            visible: trayOpen
+            implicitHeight: trayMaster.height
+            implicitWidth: trayMaster.width - trayButton.width - parent.spacing
+            RowLayout {
+                anchors.fill: parent
+
+                // Put items here
+            }
+        }
     }
 }

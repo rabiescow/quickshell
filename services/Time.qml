@@ -4,7 +4,7 @@ import Quickshell
 
 Singleton {
     readonly property string time: {
-        Qt.formatDateTime(clock.date, "ddd_dd.MM.yyyy_hh:mm_t");
+        Qt.formatDateTime(clock.date, "ddd dd:MM:yyyy hh:mm t");
     }
 
     SystemClock {

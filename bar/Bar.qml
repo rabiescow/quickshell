@@ -41,7 +41,7 @@ PanelWindow {
             }
 
             Rectangle {
-                Layout.preferredWidth: 220
+                Layout.preferredWidth: 200
                 Layout.preferredHeight: 32
                 color: "#1e1e2e"
                 transform: Matrix4x4 {
@@ -58,7 +58,7 @@ PanelWindow {
             }
 
             Rectangle {
-                Layout.preferredWidth: 200
+                Layout.preferredWidth: 170
                 Layout.preferredHeight: 32
                 color: "#1e1e2e"
                 transform: Matrix4x4 {
@@ -73,7 +73,7 @@ PanelWindow {
             }
 
             Rectangle {
-                Layout.preferredWidth: 300
+                Layout.preferredWidth: 240
                 Layout.preferredHeight: 32
                 color: "#1e1e2e"
                 transform: Matrix4x4 {
@@ -94,7 +94,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignRight
 
             Rectangle {
-                Layout.preferredWidth: 200
+                Layout.preferredWidth: 160
                 Layout.preferredHeight: 32
                 color: "#1e1e2e"
                 transform: Matrix4x4 {
@@ -109,7 +109,7 @@ PanelWindow {
             }
 
             Rectangle {
-                Layout.preferredWidth: 140
+                Layout.preferredWidth: Hyprland.kbLayout.length * 10 + 50
                 Layout.preferredHeight: 32
                 color: "#1e1e2e"
                 transform: Matrix4x4 {
@@ -124,7 +124,8 @@ PanelWindow {
             }
 
             Rectangle {
-                Layout.preferredWidth: 60
+                // Layout.preferredWidth: (Hyprland.workspaceNum.length * 10) + 50
+                Layout.preferredWidth: 120
                 Layout.preferredHeight: 32
                 color: "#1e1e2e"
                 transform: Matrix4x4 {
@@ -138,24 +139,68 @@ PanelWindow {
                 }
             }
 
-            Repeater {
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 32
-                    color: "#1e1e2e"
-                    transform: Matrix4x4 {
-                        matrix: Qt.matrix4x4(1, -0.2, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+            Item {
+                id: trayMaster
+                implicitHeight: parent.height
+                property bool trayOpen: true
+
+                implicitWidth: trayOpen ? 320 : trayButton.width
+                function toggleTray() {
+                    if (trayOpen) {
+                        trayOpen = false;
+                    } else {
+                        trayOpen = true;
+                    }
+                    isActive = trayOpen;
+                }
+
+                Behavior on implicitWidth {
+                    PropertyAnimation {
+                        duration: 500
+                        easing.type: Easing.OutExpo
                     }
                 }
-                model: SystemTray.items
 
-                TrayItem {
-                    barHeight: root.height
+                Row {
+                    spacing: 5
+                    anchors.fill: parent
+                    Text {
+                        id: trayButton
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: trayOpen ? "" : ""
+                        color: "#232332"
+                        font.pointSize: 15
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: parent.color = "#232332"
+                            onExited: parent.color = "#1e1e2e"
+                            onPressed: toggleTray()
+                        }
+                    }
+
+                    // The actuall tray
+                    Item {
+                        id: tray
+                        visible: trayOpen
+                        implicitHeight: trayMaster.height
+                        implicitWidth: trayMaster.width - trayButton.width - parent.spacing
+                        RowLayout {
+                            anchors.fill: parent
+                            Repeater {
+                                model: SystemTray.items
+                                Tray {
+                                    barHeight: 32
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
             Rectangle {
-                Layout.preferredWidth: 300
+                Layout.preferredWidth: 220
                 Layout.preferredHeight: 32
                 color: "#1e1e2e"
                 transform: Matrix4x4 {
